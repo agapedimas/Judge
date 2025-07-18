@@ -1,0 +1,128 @@
+<ad-title>Audit Log - Admin</ad-title>
+<ad-name>Judge for Admin</ad-name>
+
+<div class="header">
+    <div class="title">Audit Log</div>
+</div>
+
+<div class="content">
+    <div class="list"></div>
+</div>
+
+<style>
+    html:not([theme=dark]) .root .main
+    {
+        background: var(--gray-6);
+    }
+    .list 
+    {
+        margin: 0;
+        max-width: 800px;
+    }
+        .list .stack
+        {
+            grid-auto-columns: max-content auto max-content 1em;
+        }
+        .list .user
+        {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 0.5em;
+            align-items: center;
+        }
+            .list .user::after
+            {
+                content: " ";
+            }
+            .list .user img
+            {
+                width: 1.5em;
+                border-radius: 100%;
+                aspect-ratio: 1 / 1;
+            }
+            .list .time
+            {
+                color: var(--foreground-description);
+            }
+                .list .time::after
+                {
+                    content: " \ef59";
+                    color: var(--foreground-description);
+                    font-family: var(--font-icon);
+                }
+                .list .stack:not(.clickable) .time::after
+                {
+                    opacity: 0;
+                }
+
+    @media screen and (max-width: 1015px) 
+    {
+        .list .stack
+        {
+            grid-auto-flow: row;
+            grid-auto-columns: 100%;
+            gap: 5px;
+            padding: 1em;
+        }    
+        .list .user
+        {
+            grid-auto-columns: max-content;
+        }
+        .list .time
+        {
+            display: grid;
+            color: var(--foreground-description);
+            grid-auto-flow: column;
+            grid-auto-columns: max-content;
+            gap: 0.5em;
+        }
+    }
+</style>
+
+<script>
+    $.ajax({
+        method: "GET",
+        url: "/admin/auditlog/get",
+        success: data => 
+        {
+            for (let o of data)
+            {
+                let container = document.createElement("div");
+                container.classList.add("stack");
+                
+                let name = document.createElement("span");
+                name.classList.add("name");
+                name.append(o.user.nickname);
+
+                let avatar = document.createElement("img");
+                avatar.src = "/admin/profile/" + o.user.username + ".webp";
+
+                let user = document.createElement("div");
+                user.classList.add("user");
+                user.append(avatar);
+                user.append(name);
+                
+                let log = document.createElement("span");
+                log.classList.add("log");
+                log.append(o.text);
+
+                let time = document.createElement("span");
+                time.classList.add("time");
+                time.append(moment(parseInt(o.time)).format("ll h:mm A"));
+                    
+
+                if (o.reference)
+                {
+                    container.classList.add("clickable");
+                    container.setAttribute("goto", "/admin/assignments/" + o.reference);
+                }
+                
+                container.append(user);
+                container.append(log);
+                container.append(time);
+
+                $(".list").append(container);
+            }
+        }
+    });
+</script>

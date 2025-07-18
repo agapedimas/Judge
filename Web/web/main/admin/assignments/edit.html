@@ -1,0 +1,364 @@
+<ad-title>Assignment - Admin</ad-title>
+<ad-name>Judge for Admin</ad-name>
+
+<div class="header cascaded">
+    <div class="buttons">
+        <button class="back" id="Button_EditorBack">Assignments</button>
+        <button id="Button_EditorSave" ad-tooltip="Save" disabled>Save</button>
+    </div>
+    <div class="title"></div>
+</div>
+
+<div class="content">
+    <h3>
+        <input id="Input_Name" type="text" placeholder="Assignment name"/>
+    </h3>
+    
+    <div class="editor">
+        <div class="io">
+            <div>Topic</div>
+            <input id="Input_Topic" type="text">
+            <div>Case Inputs</div>
+            <textarea id="Input_Inputs" placeholder="e.g: 1 3; A B; # $;" spellcheck="false"></textarea>
+            <div>Case Outputs</div>
+            <textarea id="Input_Outputs" placeholder="e.g: TRUE; TRUE; FALSE;" spellcheck="false"></textarea>
+        </div>
+        <div id="Input_Problem" placeholder="Problem" contenteditable="true" spellcheck="false"></div>
+        <div class="counter">
+            <span class="typed">0</span>
+            <span class="total">of 4,194,304 bytes</span>
+        </div>
+    </div>
+    
+    <div class="mainloading">
+        <div class="progressring"></div>
+    </div>
+</div>
+
+<style>
+    .content > h3
+    {
+        display: grid;
+    }
+    .root .main .activity > .content:empty
+    {
+        display: grid;
+        height: 100%;
+        grid-auto-rows: max-content;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 0.25em;
+        text-align: center;
+    }
+        .root .main .activity > .content:empty:before
+        {
+            content: "Assignment Not Found";
+            font-family: var(--font-bold);
+            font-size: 1.5em;
+        }
+        .root .main .activity > .content:empty:after
+        {
+            content: "It may have been deleted.";
+            font-size: 1.12em;
+            color: var(--foreground-description);
+        }
+    .mainloading
+    {    
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 320px;
+        right: 0;
+        background: var(--dim);
+    }
+        .mainloading .progressring
+        {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: var(--background-context);
+            padding: 15px;
+            width: 70px;
+            height: 70px;
+            transform: translate(-50%, -50%);
+            border-radius: 13px;
+            backdrop-filter: var(--filter-blur);
+        }
+    #Input_Name 
+    {
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        border: 1px solid transparent;
+        border-bottom: 1px solid transparent;
+    }
+    #Input_Name:where(:hover, :active, :focus)
+    {
+        border-bottom: 1px solid var(--overlay-4);
+    }
+    .editor 
+    {
+        display: grid;
+        grid-template-areas:
+            "problem io"
+            "problem io"
+            "problem x"
+            "counter x";
+        gap: 1em;
+        grid-auto-columns: 2fr 1fr;
+        grid-auto-rows: minmax(max-content, 215px) minmax(max-content, 215px) 1fr 1em;
+        margin: 1em 0 0 0;
+        min-height: calc(100% - 40px - var(--padding));
+        max-width: 1300px;
+    }
+        .editor .io
+        {
+            grid-area: io;
+            display: grid;
+            gap: 0.5em;
+            grid-auto-rows: max-content;
+        }
+            .editor .io > div 
+            {
+                text-transform: uppercase;
+                font-size: 0.8em;
+                font-family: var(--font-semibold);
+                letter-spacing: 0.03em;
+                color: var(--foreground-description);
+            }
+            .editor .io input[type=text]
+            {
+                margin: 0 0 1em;
+            }
+            .editor .io textarea
+            {
+                padding: 0.5em 0.675em;
+                white-space: pre;
+                font-family: "Cascadia Mono", monospace;
+                font-size: 0.85rem;
+                margin: 0 0 1em;
+                min-height: 11em;
+                resize: vertical;
+            }
+        .editor #Input_Problem
+        {
+            grid-area: problem;
+            display: block;
+            outline: 0;
+            font-size: 1.15rem;
+            line-height: 1.5;
+        }
+            .editor #Input_Problem:empty:before 
+            {
+                content: "Type the assignment problem here";
+                color: var(--foreground-description);
+            }
+            .editor #Input_Problem * 
+            {
+                max-width: 100%;
+            }
+            .editor #Input_Problem *:first-child
+            {
+                margin-top: 0;
+            }
+            .editor #Input_Problem strong,
+            .editor #Input_Problem b
+            {
+                font-family: var(--font-bold);
+            }
+            .editor #Input_Problem p
+            {
+                margin-block-start: 0;
+                margin-block-end: 0;
+            }
+        .editor .counter
+        {
+            grid-area: counter;
+            font-size: 0.7em;
+            font-family: var(--font-semibold);
+            letter-spacing: 0.05em;
+            color: var(--foreground-description);
+        }
+
+    @media screen and (max-width: 800px) 
+    {
+        .mainloading
+        {    
+            bottom: 60px;
+            left: 0;
+        }    
+    }
+</style>
+
+<script>
+    Button_EditorBack.onclick = Editor_Back;
+    Button_EditorSave.onclick = Editor_Save;
+
+    const url = new URLSearchParams(window.location.search);
+    const id = url.get("id");
+
+    $.ajax({
+        method: "POST",
+        url: "/assignments/get/" + id,
+        data: {},
+        success: data => 
+        {
+            Input_Name.value = data.name;
+            Input_Topic.value = data.topic;
+            Input_Inputs.value = data.inputs;
+            Input_Outputs.value = data.outputs;
+            Input_Problem.innerHTML = data.problem || "";
+
+            Editor_UnsavedChanges = false;
+            $(".mainloading").hide();
+            document.title = data.name + " - Admin - " + $("[ad-app-title]").attr("ad-app-title");
+        },
+        error: response =>
+        { 
+            if (response.status == 404)
+            {
+                $(".mainloading").hide();
+                $(".main > .activity > .content").html("");
+            }
+        }
+    })
+
+
+    Input_Problem.onkeydown = function(e)
+    {
+        if (e.key == "Tab") 
+        {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+
+            this.value = this.value.substring(0, start) +
+            "\t" + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+    } 
+    
+    let Editor_UnsavedChanges = false;
+    let Editor_Loaded = false;
+
+    function Editor_Back()
+    {
+        window.history.back();
+    }
+
+    function Editor_Save()
+    {
+        $(".mainloading").show();
+        $.ajax({
+            method: "POST",
+            url: "/assignments/update",
+            data: 
+            {
+                id: id,
+                name: Input_Name.value,
+                topic: Input_Topic.value,
+                problem: Input_Problem.innerHTML,
+                inputs: Input_Inputs.value,
+                outputs: Input_Outputs.value,
+
+            },
+            success: data => 
+            {
+                $(".mainloading").hide();
+                Button_EditorSave.disabled = true;
+                Editor_UnsavedChanges = false;
+                Components.Notification.Send({
+                    Title: "Saved",  
+                    Message: "The assignment has been saved to the server.", 
+                    Icon: "\uef22",
+                    Id: "Assignment_Save"
+                })
+            },
+            error: data => 
+            {
+                $(".mainloading").hide();
+                if (data.status == 0)
+                {
+                    Components.Notification.Send({
+                        Title: "Save Failed",  
+                        Message: "You're offline. Connect to the internet to save this assignment.", 
+                        Icon: "\ufe64",
+                        Id: "Assignment_Save"
+                    })
+                }
+                else
+                {
+                    Components.Notification.Send({
+                        Title: "Save Failed",  
+                        Message: "Something went wrong while saving the assignment.", 
+                        Icon: "\ufe64",
+                        Id: "Assignment_Save"
+                    })
+                }
+            }
+        }) 
+    }
+
+    var observer = new MutationObserver(function(mutations) 
+    {
+        if (Editor_Loaded == false)
+            Editor_Loaded = true;
+        else
+        {
+            Button_EditorSave.disabled = false;
+            Editor_UnsavedChanges = true;
+        }
+        
+        $(".editor .counter .typed").html(new Intl.NumberFormat().format(Input_Problem.innerHTML.length));
+    });
+
+    observer.observe(Input_Problem, 
+    {
+        childList:      true,
+        characterData:  true,
+        subtree:        true
+    });
+
+    Input_Inputs.oninput = function()
+    {
+        Button_EditorSave.disabled = false;
+        Editor_UnsavedChanges = true;
+    }
+
+    Input_Outputs.oninput = function()
+    {
+        Button_EditorSave.disabled = false;
+        Editor_UnsavedChanges = true;
+    }
+
+    Input_Name.oninput = function()
+    {
+        Button_EditorSave.disabled = false;
+        Editor_UnsavedChanges = true;
+    }
+
+    Input_Topic.oninput = function()
+    {
+        Button_EditorSave.disabled = false;
+        Editor_UnsavedChanges = true;
+    }
+
+    window.onkeydown = function(e)
+    {
+        if (e.ctrlKey && e.key == "s")
+        {
+            e.preventDefault();
+            Button_EditorSave.click();
+        }
+    }
+
+    window.onbeforeunload = function() 
+    {
+        if (Editor_UnsavedChanges == true)
+            return "You have unsaved changes on this assignment. Are you sure want to continue?";
+    };
+</script>

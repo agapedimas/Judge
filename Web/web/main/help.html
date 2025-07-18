@@ -1,0 +1,134 @@
+<ad-title>Help</ad-title>
+<ad-name>Help - Judge</ad-name>
+
+<div class="header">
+    <div class="title">Help</div>
+</div>
+
+<div class="content">
+    <div class="list" id="List_Administrators" ad-header="Administrators"></div>
+    <div class="list" id="List_References" ad-header="References"></div>
+</div>
+
+<style>
+    html:not([theme=dark]) .root .main
+    {
+        background: var(--gray-6);
+    }
+    h2
+    {
+        margin: 0 0 0.5em;
+    }
+    .list 
+    {
+        max-width: 800px;
+    }
+        .list .stack
+        {
+        }
+            #List_Administrators .stack img
+            {
+                width: 100%;
+                aspect-ratio: 1 / 1;
+                border-radius: 100%;
+            }
+            #List_References .stack img
+            {
+                width: 100%;
+                height: 60%;
+                aspect-ratio: 1 / 1;
+                filter: brightness(0);
+            }
+            [theme=dark]
+            #List_References .stack img
+            {
+                filter: contrast(0.1) brightness(10);
+            }
+            .list .stack .icon
+            {
+                font-size: 0.75em;
+                color: var(--foreground-description);
+            }
+</style>
+
+<script>
+    (new Function('window.Usernames = <#? adminusernames ?#>'))();
+
+    for (let username of Usernames)
+    {
+        let img = document.createElement("img");
+        img.src = "/admin/profile/" + username.username + ".webp";
+
+        let name = document.createElement("span");
+        name.innerHTML = username.nickname;
+
+        let action = document.createElement("span");
+        action.classList.add("icon");
+        action.innerHTML = "\uebd2";
+
+        let stack = document.createElement("div");
+        stack.append(img);
+        stack.append(name);
+        stack.append(action);
+        stack.classList.add("stack");
+        stack.classList.add("iconed");
+        stack.classList.add("clickable");
+
+        stack.onclick = function()
+        {
+            if (navigator.userAgentData.mobile)
+                window.location.href = "instagram://user?username=" + username.url.split("/").pop().trim();
+            else
+                window.open(username.url, "_blank");
+        }
+
+        $(List_Administrators).append(stack);
+    }
+
+    const References = 
+    [
+        {
+            name: "W3Schools",
+            url: "https://www.w3schools.com/java",
+            logo: "https://cdn.brandfetch.io/w3schools.com/fallback/lettermark/theme/dark/h/512/w/512/logo?c=1bfwsmEH20zzEfSNTed"
+        },
+        {
+            name: "Competitive Programming Book",
+            url: "https://cpbook.net/methodstosolve",
+            logo: "https://cpbook.net/omega.png"
+        },
+        {
+            name: "ChatGPT",
+            url: "https://chatgpt.com",
+            logo: "https://cdn.brandfetch.io/openai.com/fallback/lettermark/theme/dark/h/512/w/512/symbol?c=1bfwsmEH20zzEfSNTed"
+        }
+    ]
+
+    for (let reference of References)
+    {
+        let img = document.createElement("img");
+        img.src = reference.logo;
+
+        let name = document.createElement("span");
+        name.innerHTML = reference.name;
+
+        let action = document.createElement("span");
+        action.classList.add("icon");
+        action.innerHTML = "\uebd2";
+
+        let stack = document.createElement("div");
+        stack.append(img);
+        stack.append(name);
+        stack.append(action);
+        stack.classList.add("stack");
+        stack.classList.add("iconed");
+        stack.classList.add("clickable");
+
+        stack.onclick = function()
+        {
+            window.open(reference.url, "_blank");
+        }
+
+        $(List_References).append(stack);
+    }
+</script>

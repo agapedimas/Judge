@@ -1,0 +1,248 @@
+<ad-title>Settings</ad-title>
+<ad-name>Settings - Judge</ad-name>
+
+<div class="header">
+    <div class="title">Settings</div>
+</div>
+
+<div class="content">
+    <div class="list" ad-header="Appearance" ad-footer="">
+        <div class="stack">
+            <div>Theme</div>
+            <select class="plain" name="theme" id="Select_Theme">
+                <option value="system">System default</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <div class="stack">
+            <div>Accent color</div>
+            <div id="Settings_Accents">
+                <div class="color" accent="red"></div>
+                <div class="color" accent="yellow"></div>
+                <div class="color" accent="green"></div>
+                <div class="color" accent="cyan"></div>
+                <div class="color" accent="blue"></div>
+                <div class="color" accent="indigo"></div>
+                <div class="color" accent="purple"></div>
+            </div>
+        </div>
+    </div>
+    <div class="list" ad-header="Storage" ad-footer="Data such as your assignment code and progress, is only stored on this device and is not synced with other devices or your account.">
+        <div class="stack">
+            <div>Usage</div>
+            <div>
+                <span id="Text_Storage">0</span>
+                <span>of 5120 KB</span>
+            </div>
+        </div>
+        <div class="stack">
+            <div>Manage data</div>
+            <button class="critical plain" id="Button_ClearData">Clear data</button>
+        </div>
+    </div>
+    <div class="list" ad-header="Compiler" ad-footer="">
+        <div class="stack">
+            <div>Git Repository</div>
+            <button class="plain" goto="https://github.com/engineer-man/piston" ad-type="newtab">
+                <span>engineer-man/piston</span>
+                <span class="icon">&#xebad;</span>
+            </button>
+        </div>
+        <div class="stack">
+            <div>Status</div>
+            <div status="<#? compiler.status_code ?#>"></div>
+        </div>
+    </div>
+    <div class="list" ad-header="About" ad-footer="">
+        <div class="stack">
+            <div>Version</div>
+            <div style="opacity: 0.6"><#? appversion ?#></div>
+        </div>
+        <div class="stack vertical">
+            <div>Copyright</div>
+            <div style="opacity: 0.6;">© 2025 Agape Dimas. All rights reserved.</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    html:not([theme=dark]) .root .main
+    {
+        background: var(--gray-6);
+    }
+    h2
+    {
+        margin: 0 0 0.5em;
+    }
+    .list
+    {
+        max-width: 800px;
+    }
+    #Settings_Account
+    {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 8em auto;
+        margin: 1.5em 0 2em;
+        align-items: center;
+        gap: 1.5em;
+    }
+        #Settings_Account img
+        {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 100%;
+        }
+        #Settings_Account .details
+        {
+        }
+            #Settings_Account .details .name
+            {    
+                font-size: 1.5em;
+                font-family: var(--font-semibold);
+            }
+            #Settings_Account .details .description
+            {    
+                font-size: 1.5em;
+                font-family: var(--font-semibold);
+                color: var(--foreground-description);
+            }
+            #Settings_Account .details button
+            {
+                margin: 1em 0 0;
+            }
+    #Settings_Accents
+    {
+        
+    }
+        #Settings_Accents .color
+        {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 100%;
+            outline: 2px solid transparent;
+            transition: 0.4s var(--key-animation) outline, 0.4s var(--key-animation) transform;
+        }
+        #Settings_Accents .color:hover
+        {
+            outline: 2px solid var(--text);
+        }
+            #Settings_Accents .color:active
+        {
+            transform: scale(0.8);
+        }
+        
+        #Settings_Accents .color[accent=red]
+        {
+            background: #ff3b30;
+        }
+        #Settings_Accents .color[accent=yellow]
+        {
+            background: #ffcc00;
+        }
+        #Settings_Accents .color[accent=green]
+        {
+            background: #34c759;
+        }
+        #Settings_Accents .color[accent=cyan]
+        {
+            background: #32ade6;
+        }
+        #Settings_Accents .color[accent=blue]
+        {
+            background: #007aff;
+        }
+        #Settings_Accents .color[accent=indigo]
+        {
+            background: #5856d6;
+        }
+        #Settings_Accents .color[accent=purple]
+        {
+            background: #af52de;
+        }
+
+    [ad-header=Compiler] [status]
+    {
+        display: grid;
+        grid-auto-flow: column;
+        gap: 0.5em;
+        align-items: center;
+    }
+        [ad-header=Compiler] [status]:before 
+        {
+            font-family: var(--font-icon);
+            font-size: 0.9em;
+        }
+        [ad-header=Compiler] [status=up]:before 
+        {
+            content: "\ef1d";
+        }
+        [ad-header=Compiler] [status=up]:after 
+        {
+            content: "Up";
+        }
+        [ad-header=Compiler] [status=checking]:before
+        {
+            content: "\f995";
+        }
+        [ad-header=Compiler] [status=checking]:after
+        {
+            content: "Checking";
+        }
+        [ad-header=Compiler] [status=down]:before 
+        {
+            content: "\f1bc";
+        }
+        [ad-header=Compiler] [status=down]:after 
+        {
+            content: "Unavailable";
+        }
+</style>
+<script>
+    Select_Theme.value = localStorage.getItem("theme");
+    $("#Settings_Accents .color").on("click", function () { Color_Change(this.getAttribute("accent")) });
+    Select_Theme.onchange = function () { Theme_Change(this.value) }
+
+    function Color_Change(accent)
+    {
+        localStorage.setItem("accent", accent);
+        CheckAccent();
+    }
+
+    function Theme_Change(theme)
+    {
+        localStorage.setItem("theme", theme);
+        CheckTheme();
+    }
+
+    const Storage_Usage = (JSON.stringify(localStorage).length * 2 / 1024).toFixed(2);
+    Text_Storage.innerHTML = Storage_Usage;
+
+    Button_ClearData.onclick = function()
+    {   
+        Components.ActionSheet.Open(
+        {
+            Title: "Are you sure want to clear data?",
+            Description: "Your progress and code saved on this browser will be deleted.",
+            Actions: [
+                { 
+                    Title: "Delete", Type: "Options.Critical", 
+                    Action: o => 
+                    { 
+                        localStorage.removeItem("assignments");
+                        localStorage.removeItem("assignment_preload");
+                        localStorage.removeItem("compiler_code");
+
+                        const Storage_Usage = (JSON.stringify(localStorage).length * 2 / 1024).toFixed(2);
+                        Text_Storage.innerHTML = Storage_Usage;
+                    } 
+                },
+                { 
+                    Title: "Cancel", Type: "Footer"
+                }
+            ]
+        });
+    }
+</script>

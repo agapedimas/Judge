@@ -1,0 +1,324 @@
+<ad-title>Compiler</ad-title>
+<ad-name>Compiler - Judge</ad-name>
+
+<div class="header">
+    <div class="title">Compiler</div>
+</div>
+
+<div class="content">
+    <div class="editor">
+        <textarea id="code" spellcheck="false"></textarea>
+        <div class="controls">
+            <button id="run" class="accent">
+                <span class="icon">&#xf8ac;</span>
+                <div class="progressring"></div>
+                <span>Run</span>
+            </button>
+            <button id="save" class="accent plain">
+                <span>Save</span>
+            </button>
+        </div>
+        <div class="io">
+            <span>Input</span>
+            <textarea id="input" spellcheck="false"></textarea>
+            <span>Output</span>
+            <div id="output"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .editor 
+    {
+        display: grid;
+        grid-template-areas:
+            "code controls"
+            "code io";
+        gap: 1em;
+        grid-auto-columns: 2fr 1fr;
+        grid-auto-rows: auto 1fr;
+        height: 100%;
+    }
+        .editor #code
+        {
+            grid-area: code;
+            font-family: "Cascadia Mono", monospace;
+            font-size: 0.9rem;
+            line-height: 1.5em;
+            white-space: nowrap;
+            padding: 1em 1.25em;
+            tab-size : 4;
+        }
+        .editor .controls
+        {
+            grid-area: controls;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            gap: 10px;
+        }
+            .editor .controls #run .progressring
+            {
+                width: 1em;
+                height: 1em;
+            }
+            .editor:not(.loading) .controls #run .progressring,
+            .editor.loading .controls #run .icon
+            {
+                display: none;
+            }
+        .editor .io
+        {
+            grid-area: io;
+            display: grid;
+            gap: 1em;
+            grid-auto-rows: auto 1fr auto 2fr;
+        }
+            .editor .io span
+            {
+                text-transform: uppercase;
+                font-size: 0.8em;
+                font-family: var(--font-semibold);
+                letter-spacing: 0.03em;
+                color: var(--foreground-description);
+            }
+            .editor #input
+            {
+                min-height: 100px;
+                padding: 0.5em 0.675em;
+                white-space: pre;
+                font-family: "Cascadia Mono", monospace;
+                font-size: 0.85rem;
+            }
+            .editor #output
+            {
+                min-height: 100px;
+                border-radius: 8px;
+                padding: 0.5em 0.675em;
+                background: var(--overlay-7);
+                overflow: auto;
+                white-space: pre;
+                font-family: "Cascadia Mono", monospace;
+                font-size: 0.85rem;
+                user-select: text;
+            }
+            .editor #output.error
+            {
+                background: #fffad4;
+                color: #917f00;
+            }
+            [theme=dark]
+            .editor #output.error
+            {
+                background: #1a1600;
+                color: #ffff7d;
+            }
+    
+    @media screen and (max-width: 1040px)
+    {
+        .editor 
+        {
+            display: grid;
+            grid-template-areas:
+                "code"
+                "controls"
+                "io";
+            gap: 1em;
+            grid-auto-columns: 2fr 1fr;
+            grid-auto-rows: auto 1fr;
+        }
+            .editor #code
+            {
+                height: 500px;
+            }
+    }
+</style>
+
+<script>
+    const defaultCode = 
+`import java.util.Scanner;
+
+public class unpar
+{  
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        System.out.print("Inputnya: ");
+        System.out.println(a);
+    }
+}`
+    code.innerHTML = localStorage.getItem("compiler_code") || defaultCode;
+    input.value = localStorage.getItem("compiler_input") || "1955";
+
+    $(code).keydown(function(e)
+    {
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+
+        if (e.key == "Tab") 
+        {
+            e.preventDefault();
+
+            this.value = this.value.substring(0, start) +
+            "\t" + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+        else if (e.key == "{") 
+        {
+            e.preventDefault();
+
+            this.value = this.value.substring(0, start) +
+            "{}" + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+        else if (e.key == "(") 
+        {
+            e.preventDefault();
+
+            this.value = this.value.substring(0, start) +
+            "()" + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+        else if (e.key == "[") 
+        {
+            e.preventDefault();
+
+            this.value = this.value.substring(0, start) +
+            "[]" + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+        else if (e.key == "Backspace") 
+        {
+            if (this.value[start - 1] == "{" && this.value[start] == "}")
+            {
+                e.preventDefault();
+                this.value = this.value.substring(0, start - 1) + this.value.substring(end + 1);
+                this.selectionStart = this.selectionEnd = start - 1;
+            }
+            else if (this.value[start - 1] == "(" && this.value[start] == ")")
+            {
+                e.preventDefault();
+                this.value = this.value.substring(0, start - 1) + this.value.substring(end + 1);
+                this.selectionStart = this.selectionEnd = start - 1;
+            }
+            else if (this.value[start - 1] == "[" && this.value[start] == "]")
+            {
+                e.preventDefault();
+                this.value = this.value.substring(0, start - 1) + this.value.substring(end + 1);
+                this.selectionStart = this.selectionEnd = start - 1;
+            }
+        }
+        else if (e.key == "Enter")
+        {
+            e.preventDefault();
+
+            const isBlock = this.value[start - 1] == "{" && this.value[start] == "}";
+
+            let beforeCursor = this.value.substring(0, start);
+            let prevLine = beforeCursor.substring(beforeCursor.lastIndexOf("\n") + 1);
+            let indent = prevLine.match(/^\s*/)[0].replaceAll("    ", "\t");
+
+            this.value = beforeCursor + "\n" + indent + this.value.substring(end);
+
+            this.selectionStart =
+            this.selectionEnd = start + indent.length + 1;
+
+            if (isBlock)
+            {
+                start = this.selectionStart;
+                end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "\t\n" + indent + this.value.substring(end);
+                
+                this.selectionStart = this.selectionEnd = start + 1;
+            }
+        } 
+    }); 
+
+    $(run).click(function()
+    {
+        $(".editor").addClass("loading");
+        $(".editor .controls button").attr("disabled", "");
+        $(".editor .io #output").removeClass("error");
+        output.innerHTML = "Compiling...";
+
+        $.ajax (
+        {
+            url: "/compile/java",
+            type: "POST",
+            data: 
+            { 
+                code: code.value, 
+                input: input.value
+            },
+            success: function(data) 
+            {
+                if (data.error)
+                {
+                    output.innerHTML = data.error;
+                    $(".editor .io #output").addClass("error");
+                }
+                else
+                {
+                    output.innerHTML = data.output;
+                    $(".editor .io #output").removeClass("error");
+                }
+                $(".editor").removeClass("loading");
+                $(".editor .controls button").removeAttr("disabled");
+            },
+            error: function(data) 
+            {
+                if (data.status == 0)
+                {
+                    Components.Notification.Send({
+                        Title: "Compile Failed",  
+                        Message: "You're offline. Connect to the internet to compile the code.", 
+                        Icon: "\ufe64",
+                        Id: "Compile_Failed"
+                    })
+                }
+                else
+                {
+                    Components.Notification.Send({
+                        Title: "Compile Failed",  
+                        Message: "Something went wrong while compiling the code.", 
+                        Icon: "\ufe64",
+                        Id: "Compile_Failed"
+                    })
+                }
+                $(".editor").removeClass("loading");
+                $(".editor .controls button").removeAttr("disabled");
+                output.innerHTML = "";
+            }
+        });
+    });
+
+    $(save).click(function()
+    {
+        localStorage.setItem("compiler_code", code.value);
+        localStorage.setItem("compiler_input", input.value);
+        Components.Notification.Send({
+			Title: "Saved",  
+			Message: "Your code has been saved to this browser", 
+            Icon: "\uef1c",
+			Id: "Compiler_Save"
+		})
+    });
+    
+    window.onkeydown = function(e)
+    {
+        if (e.ctrlKey && e.key == "s")
+        {
+            e.preventDefault();
+            $(save).click();
+        }
+    }
+</script>

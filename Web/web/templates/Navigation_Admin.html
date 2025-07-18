@@ -1,0 +1,40 @@
+<section class="desktop">
+	<div class="account" goto="/admin/settings">
+		<img class="picture" src="/admin/profile/<#? activeuser.username ?#>.webp"/>
+		<div class="details">
+			<div class="name"><#? activeuser.nickname ?#></div>
+			<div class="description"><#? activeuser.username ?#></div>
+		</div>
+	</div>
+	<div class="navigation">
+		<a goto="/admin/assignments">
+			<span class='icon'>&#xed8a;</span>
+			<span>Assignments</span>
+		</a>
+		<a goto="/admin/auditlog">
+			<span class='icon'>&#xefba;</span>
+			<span>Audit Log</span>
+		</a>
+		<a goto="/admin/settings">
+			<span class='icon'>&#xf337;</span>
+			<span>Settings</span>
+		</a>
+	</div> 
+</section>
+
+<section class="mobile">
+	<span class="navigation">	
+		<a goto="/admin/assignments">
+			<span class='icon'>&#xed89;</span>
+			<span>Assignments</span>
+		</a>
+		<a goto="/admin/auditlog">
+			<span class='icon'>&#xefba;</span>
+			<span>Audit Log</span>
+		</a>
+		<a goto="/admin/settings">
+			<span class='icon'>&#xf337;</span>
+			<span>Settings</span>
+		</a>
+	</span> 
+</section>

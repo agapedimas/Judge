@@ -1,0 +1,531 @@
+<ad-title>Assignments - Admin</ad-title>
+<ad-name>Judge for Admin</ad-name>
+
+<div class="header">
+    <div class="buttons">
+        <button id="Button_CreateAssignment">Create</button>
+    </div>
+    <div class="title">Assignments</div>
+    <input id="Input_Search" type="search" placeholder="Search assignments" autocorrect="off" autocomplete="off">
+</div>
+
+<div class="content">
+    <div class="items">
+        <div class="item placeholder"></div>
+        <div class="item placeholder"></div>
+        <div class="item placeholder"></div>
+        <div class="item placeholder"></div>
+    </div>
+</div>
+
+<div id="PopOver_CreateAssignment" class="popover">
+    <div class="title">
+        <button id="Button_CancelCreateAssignment" class="plain">Cancel</button>
+        <span>New Assignment</span>
+        <button id="Button_DoneCreateAssignment" class="plain">
+            <div class="progressring"></div>
+            <span>Create</span>
+        </button>
+    </div>
+    <div class="content">
+        <div class="list">
+            <div class="stack">
+                <input id="Input_CreateAssignmentName" class="plain" type="text" placeholder="Name"/>
+            </div>
+            <div class="stack">
+                <input id="Input_CreateAssignmentTopic" class="plain" type="text" placeholder="Topic"/>
+            </div>
+            <div class="stack">
+                <div>Author</div>
+                <div id="Grid_CreateAssignmentAuthor">
+                    <img src="/admin/profile/<#? activeuser.username ?#>.webp"/>
+                    <span><#? activeuser.nickname ?#></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .items
+    {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        transition: 0.25s opacity;
+    }
+    .items.loading
+    {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    .searching .items:empty
+    {
+        display: grid;
+        height: 100%;
+        grid-auto-rows: max-content;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 0.25em;
+        text-align: center;
+    }
+        .searching .items:empty:before
+        {
+            content: "No Results";
+            font-family: var(--font-bold);
+            font-size: 1.5em;
+        }
+        .searching .items:empty:after
+        {
+            content: "Try a new search.";
+            font-size: 1.12em;
+            color: var(--foreground-description);
+        }
+        .items .item
+        {
+            display: grid;
+            position: relative;
+            grid-template-areas: 
+                "topic topic"
+                "name name"
+                "snippet snippet"
+                "author action";
+            grid-auto-columns: minmax(0, 1fr) 30px;
+            grid-auto-rows: max-content max-content auto max-content max-content;
+            width: 275px;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.045);
+            padding: calc(1.3em - 10px) 1.25em 1.3em;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        [theme=dark] .items .item 
+        {
+            background: var(--overlay-7);
+        }
+        .items .item.placeholder 
+        {
+            height: 320px;
+            animation: loading 1.25s alternate infinite;
+        }
+            .items .item .hover
+            {    
+                position: absolute;
+                display: block;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+            .items .item .hover:hover
+            {        
+                background: var(--overlay-6);
+            }
+            [theme=dark]
+            .items .item .hover:hover
+            {        
+                background: var(--overlay-8);
+            }
+            .items .item .hover:active
+            {    
+                background: var(--overlay-5);
+            }
+            [theme=dark]
+            .items .item .hover:active
+            {        
+                background: var(--overlay-8);
+            }
+            .items .item .name
+            {    
+                grid-area: name;
+                font-size: 1.2em;
+                font-family: var(--font-bold);
+            }
+            .items .item .topic
+            {
+                grid-area: topic;
+                display: block;
+                height: 1.2em;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                margin: 1em 0 -10px;
+                font-size: 0.8em;
+                font-family: var(--font-semibold);
+                letter-spacing: 0.05em;
+                color: var(--foreground-description);
+            }
+            .items .item .snippet
+            {
+                grid-area: snippet;
+                height: calc(9 * 1.35em);
+                line-height: 1.35em;
+                overflow: hidden;
+                margin: 0 0 0.35em;
+                white-space: pre-line;
+            }
+            .items .item .author
+            {
+                grid-area: author;
+                display: grid;
+                grid-template-areas:
+                    "img name"
+                    "img time";
+                grid-auto-flow: column;
+                grid-auto-columns: calc(30px + 0.65em) auto;
+                align-items: center;
+            }
+                .items .item .author img
+                {
+                    grid-area: img;
+                    background: var(--overlay-8);
+                    aspect-ratio: 1 / 1;
+                    border-radius: 100%;
+                    width: 30px;
+                    height: 30px;
+                }
+                .items .item .author .nickname
+                {
+                    grid-area: name;
+                }
+                .items .item .author .time
+                {
+                    grid-area: time;
+                    font-size: 0.85em;
+                    color: var(--foreground-description);
+                }
+            .items .item .action
+            {
+                grid-area: action;  
+                border-radius: 100%;
+                height: 30px;
+                width: 30px;
+                font-size: 0.8em;
+                color: var(--foreground-description);
+                align-self: center;
+                z-index: 1;
+            }
+    #PopOver_CreateAssignment
+    {
+        display: block;
+    }
+        #PopOver_CreateAssignment #Grid_CreateAssignmentAuthor
+        {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 0.5em;
+            align-items: center;
+        }
+            #PopOver_CreateAssignment #Grid_CreateAssignmentAuthor img
+            {
+                width: 1.5em;
+                border-radius: 100%;
+                aspect-ratio: 1 / 1;
+            }
+        #PopOver_CreateAssignment #Button_DoneCreateAssignment
+        {
+            position: relative;
+        }
+            #PopOver_CreateAssignment #Button_DoneCreateAssignment .progressring
+            {
+                width: 1em;
+                height: 1em;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            #PopOver_CreateAssignment:not(.loading) #Button_DoneCreateAssignment > .progressring
+            {
+                display: none;
+            }
+            #PopOver_CreateAssignment.loading #Button_DoneCreateAssignment > span
+            {
+                opacity: 0.3;
+            }
+
+    @media screen and (max-width: 945px)
+    {
+        .items .item 
+        {
+            width: calc(100% + var(--padding) * 2);
+            margin: 0 calc(var(--padding) * -1);
+            padding: 0 var(--padding);
+            background: transparent !important;
+            border-radius: 0;
+            overflow: unset;
+            grid-template-areas: 
+                "topic action"
+                "name action"
+                "snippet snippet"
+                "author x"
+                "progress progress";
+        }
+            .items .item:not(:first-child):after
+            {
+                content: "";
+                position: absolute;
+                top: -7.5px;
+                left: var(--padding);
+                right: var(--padding);
+                height: 1px;
+                background: var(--overlay-6);
+            }
+            .items .item .snippet 
+            {
+                height: calc(5* 1.35em);
+            }
+            .items .item .action
+            {
+                transform: translateY(1em);
+            }
+            .items .item .progress
+            {
+                background: transparent;
+                margin: 0;
+                padding: 0;
+                height: 30px;
+            }
+    }
+
+    @keyframes loading 
+    {
+        from 
+        {
+            background: var(--overlay-8);
+        }    
+        to 
+        {
+            background: var(--overlay-6);
+        }    
+    }
+</style>
+
+<script>
+    (new Function('window.Usernames = <#? adminusernames ?#>'))();
+
+    let searchTimeout = null;
+    let originalItems;
+
+    Input_Search.oninput = function()
+    {
+        clearTimeout(searchTimeout);
+        if (this.value == "")
+        {
+            $(".items").html(originalItems);
+            $(".items").removeClass("loading");
+        }
+        else
+        {
+            $(".items").addClass("loading");
+            searchTimeout = setTimeout(function()
+            {
+                Assignment_Load(Input_Search.value.trim());
+                $(".items").removeClass("loading");
+            }, 500);
+        }
+    }
+
+    function Assignment_Load(query = "")
+    {
+        $.ajax({
+            method: "POST",
+            url: "/assignments/get",
+            data: 
+            {
+                query: query
+            },
+            success: data => 
+            {
+                $(".items").html("");
+
+                data.forEach(assignment => 
+                {
+                    let action = document.createElement("button");
+                    let icon = document.createElement("span");
+                    icon.classList.add("icon");
+                    icon.innerHTML = "\uf153";
+                    action.classList.add("action");
+                    action.append(icon);
+                    
+                    Components.ContextMenu.Add(
+                        "Context_Asssignment",
+                        [
+                            {
+                                Title: "Edit",
+                                Icon: "f7cf",
+                                Action: (element) => { window.location.href = "/admin/assignments/edit?id=" + element.data.id }
+                            },
+                            {
+                                Title: "Share",
+                                Show: "share" in navigator,
+                                Icon: "fb88",
+                                Action: (element) => {
+                                    
+                                    let title = element.data.name ;
+                                    let author = Usernames.find(o => o.username == assignment.author) || { nickname: "unknown" };
+                                    let text = "Can you solve this problem?";
+    
+                                    navigator.share({
+                                        title: title,
+                                        text: text + "\n\n" + title + " by " + author + "\n",
+                                        url: "https://agapedimas.com/j/" + assignment.id,
+                                    })
+                                }
+                            },
+                            "Separator",
+                            {
+                                Title: "Delete",
+                                Icon: "fd3c",
+                                Action: (element) => 
+                                { 
+                                    Components.ActionSheet.Open(
+                                    {
+                                        Title: "Delete \"" + element.data.name + "\"?",
+                                        Description: "This assignment will be deleted from server and can't be recovered.",
+                                        Actions: [
+                                            { 
+                                                Title: "Delete", Type: "Options.Critical", 
+                                                Action: o => 
+                                                { 
+                                                    $.ajax({
+                                                        method: "POST",
+                                                        url: "/assignments/delete",
+                                                        data: { id: element.data.id },
+                                                        success: o => window.location.reload()
+                                                    });
+                                                } 
+                                            },
+                                            { 
+                                                Title: "Cancel", Type: "Footer", 
+                                                Action: Components.ActionSheet.Close
+                                            }
+                                        ]
+                                    });
+                                },
+                                Type: "critical"
+                            }
+                        ]
+                    )
+    
+                    let img = document.createElement("img");
+                    img.src = "/admin/profile/" + assignment.author + ".webp";
+    
+                    let username = document.createElement("span");
+                    let account = Usernames.find(o => o.username == assignment.author) || { nickname: "unknown" };
+                    username.innerHTML = account.nickname;
+                    
+                    let time = document.createElement("span");
+                    time.classList.add("time");
+                        
+                    let t1 = parseInt(assignment.time);
+                    let t2 = new Date(Date.now() - assignment.time);
+                    time.append(t2 > 1000 * 3600 * 24 * 6 ? moment(t1).format("ll") : moment(t1).fromNow());
+    
+                    let author = document.createElement("div");
+                    author.classList.add("author");
+                    author.append(img);
+                    author.append(username);
+                    author.append(time);
+    
+                    let topic = document.createElement("span");
+                    topic.classList.add("topic");
+                    topic.innerHTML = assignment.topic;
+    
+                    let name = document.createElement("span");
+                    name.classList.add("name");
+                    name.innerHTML = assignment.name;
+    
+                    let snippet = document.createElement("span");
+                    snippet.classList.add("snippet");
+                    snippet.innerHTML = assignment.snippet;
+    
+                    let hover = document.createElement("div");
+                    hover.classList.add("hover");
+    
+                    let container = document.createElement("div");
+                    container.classList.add("item");
+                    container.append(hover);
+                    container.append(author);
+                    container.append(topic);
+                    container.append(name);
+                    container.append(snippet);
+                    container.append(action);
+    
+                    container.data = assignment;
+    
+                    action.onclick = (e) => Components.ContextMenu.Open("Context_Asssignment", container, e);
+                    container.oncontextmenu = (e) => Components.ContextMenu.Open("Context_Asssignment", container, e);
+                    $(hover).attr("goto", "/admin/assignments/" + assignment.id);
+    
+                    $(".items").append(container);
+                });
+                
+                if (query == "")
+                    originalItems = $(".items").html();
+            }
+        })
+    }
+
+    Assignment_Load();
+
+    Input_CreateAssignmentName.onkeydown = function(e)
+    {
+        if (e.key == "Enter")
+            Input_CreateAssignmentTopic.focus();
+    }
+    Input_CreateAssignmentTopic.onkeydown = function(e)
+    {
+        if (e.key == "Enter")
+            Button_DoneCreateAssignment.click();
+    }
+
+    Button_CreateAssignment.onclick = function() { Components.PopOver.Open(PopOver_CreateAssignment, this); Input_CreateAssignmentName.value = ""; Input_CreateAssignmentName.focus(); Input_CreateAssignmentTopic.value = ""; };
+    Button_CancelCreateAssignment.onclick = function() { Components.PopOver.Close(PopOver_CreateAssignment) };
+    Button_DoneCreateAssignment.onclick = function() 
+    { 
+        $("#PopOver_CreateAssignment").addClass("loading");
+        $("#PopOver_CreateAssignment .title button").attr("disabled", "");
+
+        $.ajax({
+            method: "POST",
+            url: "/assignments/create",
+            data: 
+            {
+                name: Input_CreateAssignmentName.value,
+                topic: Input_CreateAssignmentTopic.value
+            },
+            success: function(data)
+            {
+                $("#PopOver_CreateAssignment").removeClass("loading");
+                $("#PopOver_CreateAssignment .title button").removeAttr("disabled");
+                Components.PopOver.Close(PopOver_CreateAssignment);
+                window.location.href = "/admin/assignments/edit?id=" + data;
+            },
+            error: function(data)
+            {
+                if (data.status == 0)
+                {
+                    Components.Notification.Send({
+                        Title: "Failed to Create",  
+                        Message: "You're offline. Connect to the internet to create a new assignment.", 
+                        Icon: "\ufe64",
+                        Id: "Assignment_Create"
+                    })
+                }
+                else
+                {
+                    Components.Notification.Send({
+                        Title: "Failed to Create",  
+                        Message: "omething went wrong while creating a new assignment.", 
+                        Icon: "\ufe64",
+                        Id: "Assignment_Create"
+                    })
+                }
+                $("#PopOver_CreateAssignment").removeClass("loading");
+                $("#PopOver_CreateAssignment .title button").removeAttr("disabled");
+            }
+        })
+    };
+</script>

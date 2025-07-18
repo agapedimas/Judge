@@ -1,0 +1,67 @@
+.root nav
+{
+    position: relative;
+}
+    .root nav .desktop > #Compiler_Status
+    {    
+        display: grid;
+        gap: 0.2em;
+        position: absolute;
+        bottom: var(--padding);
+        left: var(--padding);
+        right: var(--padding);
+    }
+        .root nav .desktop > #Compiler_Status .title
+        {
+            font-family: var(--font-semibold);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--foreground-description);
+        }
+        .root nav .desktop > #Compiler_Status .code
+        {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 0.5em;
+            align-items: center;
+            grid-auto-columns: max-content;
+            height: 1.75em;
+        }
+            .root nav .desktop > #Compiler_Status .code:before
+            {
+                font-family: var(--font-icon);
+                font-size: 0.9em;
+            }
+            .root nav .desktop > #Compiler_Status .code[code=up]:before
+            {
+                content: "\ef1d";
+            }
+            .root nav .desktop > #Compiler_Status .code[code=up]:after
+            {
+                content: "Up";
+            }
+            .root nav .desktop > #Compiler_Status .code[code=checking]:before
+            {
+                content: "\f995";
+            }
+            .root nav .desktop > #Compiler_Status .code[code=checking]:after
+            {
+                content: "Checking";
+            }
+            .root nav .desktop > #Compiler_Status .code[code=down]:before
+            {
+                content: "\f1bc";
+            }
+            .root nav .desktop > #Compiler_Status .code[code=down]:after
+            {
+                content: "Unavailable";
+            }
+        .root nav .desktop > #Compiler_Status .lastupdated 
+        {
+            font-size: 0.85em;
+        }
+            .root nav .desktop > #Compiler_Status .lastupdated:before 
+            {
+                content: "Last updated ";
+            }

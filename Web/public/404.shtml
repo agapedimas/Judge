@@ -1,0 +1,201 @@
+<html>
+	<head><meta charset="utf-8">
+		<script>
+			const Error_Details = 
+			{
+				line1: "Sorry, I need to turn off this app to save resources.",
+				line2: "Ask me if you want to use this app.",
+				actions: ["main site", "back"],
+				image: "error_forbidden"
+			} 
+		</script>
+		 
+		<meta content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" name="viewport"> 
+		<link rel="stylesheet" type="text/css" href="https://assets.agapedimas.com/ui/v3/style.css"> 
+		<link rel="icon" href="https://assets.agapedimas.com/icon_logo.ico"> 
+		<title>Agape Dimas</title> 
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://assets.agapedimas.com/ui/v3/head.js" id="head_js"></script>
+		<script src="https://assets.agapedimas.com/ui/v3/components.js"></script>
+		<script src="https://assets.agapedimas.com/ui/v3/events.js"></script>
+		<style>
+			html[theme=light]
+			{
+				background: var(--gray-6);
+			}
+			html[theme=dark]
+			{
+				background: var(--background-page);
+			}
+
+			.panel
+			{
+				position: fixed;
+			    top: 50%;	
+			    left: 50%;
+			    transform: translate(-50%, -50%);
+				display: grid;
+				grid-auto-flow: column;
+				background: var(--background-page);
+				border-radius: 30px;
+				overflow: hidden;
+			}
+			[theme=dark] .panel
+			{
+				background: var(--gray-6);
+			}
+				.panel > .error
+				{
+				    display: grid;
+				    padding: 35px;
+				    grid-auto-rows: max-content max-content auto max-content;
+			        min-width: 300px;
+			        max-width: 500px;
+			        width: calc(50vw - 30px);
+		            gap: 1em;
+				}
+					.panel .logo
+					{
+						height: 30px;
+					}
+					.panel #line1
+					{
+					    font-size: 2.75rem;
+					    line-height: 1.1;
+					    font-family: var(--font-bold);
+				        white-space: pre-line;
+					}
+					.panel #line2
+					{
+					    font-size: 1.5rem;
+				        white-space: pre-line;
+					}
+					.panel #actions
+					{
+					    display: grid;
+					    grid-auto-flow: column;
+					    grid-auto-columns: 1fr;
+					    gap: 10px;
+					    --accent: #c80000;
+					}
+						.panel #actions button
+						{
+							font-size: 1.2rem;
+							border-radius: 10px;
+							padding: 0.55em 0.75em;
+							text-transform: capitalize;
+						}
+				.panel > img
+				{
+				    margin: 50px 0 0 75px;
+				    height: 365px;
+				    align-self: end;    
+				    aspect-ratio: 390 / 365;
+    				object-fit: cover;
+				}
+				[theme=dark]
+				.panel > img
+				{
+					filter: brightness(0.875) contrast(1.075);
+				}
+
+			@media screen and (max-width: 950px)
+			{
+				.panel > img 
+				{
+				    margin: 50px 0 0 0;
+				    height: 350px;
+				}
+			}
+
+			@media screen and (max-width: 850px)
+			{
+				.panel > .error 
+				{
+				    width: calc(100vw - 30px);
+				}
+					.panel #line1 
+					{
+					    font-size: 2.5rem;
+					}
+					.panel #line2
+					{
+						margin-bottom: 0.35em;
+					}
+				.panel > img 
+				{
+					display: none;
+				}
+			}
+
+			@media screen and (max-width: 600px)
+			{
+				.panel > .error 
+				{
+				    padding: 30px;
+				}
+					.panel .logo
+					{
+						height: 25px;
+					}
+					.panel #line1 
+					{
+					    font-size: 2.15rem;
+					}
+					.panel #line2
+					{
+					    font-size: 1.4rem;
+						margin-bottom: 0.35em;
+					}
+					.panel #actions
+					{
+						grid-auto-flow: row;
+					}
+						.panel #actions button
+						{
+						    padding: 0.55em 1em;
+						}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="panel">
+			<div class="error">
+				<img class="logo" src="https://assets.agapedimas.com/icon_text.png"/>
+				<div id="line1"></div>
+				<div id="line2"></div>
+				<div id="actions"></div>
+			</div>
+			<img id="image" class="mascot" src="https://assets.agapedimas.com/error.webp"/>
+		</div>
+
+		<script>
+			image.src = "https://assets.agapedimas.com/" + Error_Details.image + ".webp";
+			line1.innerHTML = Error_Details.line1;
+			line2.innerHTML = Error_Details.line2;
+
+			for (let action of Error_Details.actions)
+			{
+				let button = document.createElement("button");
+
+				if (actions.children.length == 0)
+					button.classList.add("accent");
+
+				button.innerHTML = action;
+				button.onclick = function () 
+				{
+					if (action == "refresh")
+						window.location.reload();
+					else if (action == "back")
+						window.history.back();
+					else if (action == "homepage")
+						window.location.href = "/";
+					else if (action == "main site")
+						window.location.href = "https://agapedimas.com";
+				}
+
+				actions.append(button);
+			}
+		</script>
+	</body>
+</html>
