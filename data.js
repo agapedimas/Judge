@@ -322,6 +322,12 @@ function Data(Server)
             res.status(403).send("FAIL: No permission to access");
         }
     });
+
+    Server.post("/authors/get", async (req, res) => 
+    {
+        let authors = await Functions.Administrator_GetAll();
+        res.send(authors);
+    });
 }
 
 module.exports = Data;
